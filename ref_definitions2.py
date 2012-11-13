@@ -3,10 +3,9 @@
 
 import sys, string, re
 import parse_corpora
-#from nltk.corpus import stopwords
+from nltk.corpus import stopwords
 DICTIONARY_FILE = "./cedict_full.txt"
-#stopwords = stopwords.words('english')
-stopwords = []
+stopwords = stopwords.words('english')
 def get_dictionary():
         with open(DICTIONARY_FILE) as f:
                 ce_dict = f.readlines()[30:]
@@ -82,7 +81,7 @@ def get_best_definition_index(english_words, words_in_each_def):
                 return(best_choice, 0)
 
 def read_all_the_files():
-        return parse_corpora.get_alignments(50)
+        return parse_corpora.get_alignments(30)
 
 def segment_sent(c_sent):
         return c_sent.split(' ')
@@ -196,7 +195,7 @@ def baseline_is_correct(c_word, index, baseline_dict):
 		return False
 
 def main(args):
-	c_sent_dict = build_chinese_word_sent_dict(3500, 5000, {})
+	c_sent_dict = build_chinese_word_sent_dict(0, 3500, {})
 	print "REFERENCE DICTIONARY BUILT, MAKING BASELINE..."
 	prev_dict = get_most_common_index_dictionary(c_sent_dict)
 	print "BASELINE DONE, SCORING NEXT SET.."
