@@ -4,14 +4,47 @@
 import sys, string, re
 import parse_corpora
 from nltk.corpus import stopwords
+
+
+import collections
+import functools
+
+class memoized(object):
+   '''Decorator. Caches a function's return value each time it is called.
+   If called later with the same arguments, the cached value is returned
+   (not reevaluated).
+   '''
+   def __init__(self, func):
+      self.func = func
+      self.cache = {}
+   def __call__(self, *args):
+      if not isinstance(args, collections.Hashable):
+         # uncacheable. a list, for instance.
+         # better to not cache than blow up.
+         return self.func(*args)
+      if args in self.cache:
+         return self.cache[args]
+      else:
+         value = self.func(*args)
+         self.cache[args] = value
+         return value
+   def __repr__(self):
+      '''Return the function's docstring.'''
+      return self.func.__doc__
+   def __get__(self, obj, objtype):
+      '''Support instance methods.'''
+      return functools.partial(self.__call__, obj)
+
 DICTIONARY_FILE = "./cedict_full.txt"
 stopwords = stopwords.words('english')
 def get_dictionary():
         with open(DICTIONARY_FILE) as f:
-                ce_dict = f.readlines()[30:]
-                return [s.decode('utf-8') for s in ce_dict]
+                ce_dict_l = f.readlines()[30:]
+                return [s.decode('utf-8') for s in ce_dict_l]
 
-def get_blacklist(ce_dict):
+ce_dict = get_dictionary()
+
+def get_blacklist():
         '''
         word_counts = {}
         regex = re.compile('[%s]' % re.escape(string.punctuation))
@@ -35,7 +68,8 @@ def get_blacklist(ce_dict):
         '''
         return [u'fig', u'one', u'with', u'variant', u'also', u'into', u'abbr', u'have', u'not', u'get', u'China', u'prefecture', u'level', u'from', u'out', u'for', u'take', u'an', u'as', u'at', u'see', u'be', u'by', u'all', u'the', u'eg', u'surname', u'used', u'go', u'written', u'county', u'is', u'it', u'in', u'and', u'on', u'of', u'or', u'idiom', u'oneself', u'Taiwan', u'sb', u'city', u'to', u'person', u'up', u'Tibetan', u'make', u'Chinese', u'Sichuan', u'Japanese', u'name', u'place', u'district', u'capital', u'old', u'time', u'etc', u'that', u'a', u'sth', u'lit', u'state', u'autonomous', u'over', u'water', u'ones']
 
-def get_english_definitions(word, ce_dict):
+@memoized
+def get_english_definitions(word):
         '''
         Returns a list of the possible english meanings of a chinese word.
         if word == '因':
@@ -101,8 +135,7 @@ def build_chinese_word_sent_dict(read_start, read_end, prev_dict):
     where sentence_index is the index of the sentence
     in the list of sentences
     '''
-    ce_dict = get_dictionary()
-    blacklist = set(get_blacklist(ce_dict) + stopwords)
+    blacklist = set(get_blacklist() + stopwords)
     chinese_word_sent_dict = {}                
     (chinese_sents, english_sents) = read_all_the_files()
     undefined_words = 0
@@ -123,7 +156,7 @@ def build_chinese_word_sent_dict(read_start, read_end, prev_dict):
     	for c_word in c_sent_words:
     		#check if word has a sense
     		sense = False
-    		ce_definition = get_english_definitions(c_word, ce_dict)
+    		ce_definition = get_english_definitions(c_word)
     		if ce_definition == -1:
     			undefined_words +=1
     			continue
