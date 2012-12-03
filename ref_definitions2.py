@@ -3,7 +3,7 @@
 
 import sys, string, re
 import parse_corpora
-from nltk.corpus import stopwords
+#from nltk.corpus import stopwords
 
 
 import collections
@@ -36,7 +36,9 @@ class memoized(object):
       return functools.partial(self.__call__, obj)
 
 DICTIONARY_FILE = "./cedict_full.txt"
-stopwords = stopwords.words('english')
+#from nltk.corpus import stopwords
+#stopwords = stopwords.words('english')
+stopwords = ['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'it', 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don', 'should', 'now']
 def get_dictionary():
         with open(DICTIONARY_FILE) as f:
                 ce_dict_l = f.readlines()[30:]
