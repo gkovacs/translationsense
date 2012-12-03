@@ -228,11 +228,13 @@ def baseline_is_correct(c_word, index, baseline_dict):
 		return False
 
 def main(args):
-	c_sent_dict = build_chinese_word_sent_dict(0, 3500, {})
-	print "REFERENCE DICTIONARY BUILT, MAKING BASELINE..."
-	prev_dict = get_most_common_index_dictionary(c_sent_dict)
-	print "BASELINE DONE, SCORING NEXT SET.."
-	build_chinese_word_sent_dict(3500, 5000, prev_dict)
+    c_sent_dict = build_chinese_word_sent_dict(0, 3500, {})
+    print "REFERENCE DICTIONARY BUILT, MAKING BASELINE..."
+    prev_dict = get_most_common_index_dictionary(c_sent_dict)
+    print "BASELINE DONE, SCORING NEXT SET.."
+    dictionary = build_chinese_word_sent_dict(3500, 5000, prev_dict)
+    return dictionary
+
 
 if __name__ == '__main__':
     main(sys.argv)
