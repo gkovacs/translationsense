@@ -228,7 +228,6 @@ def baseline_is_correct(c_word, index, baseline_dict):
 		return baseline_dict[c_word] == index
 	else:
 		return False
-
 def main(args):
     c_sent_dict = build_chinese_word_sent_dict(0, 3500, {})
     print "REFERENCE DICTIONARY BUILT, MAKING BASELINE..."
