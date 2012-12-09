@@ -46,6 +46,17 @@ def get_dictionary():
 
 ce_dict = get_dictionary()
 
+ce_dict_hash = {}
+
+for x in ce_dict:
+  if x.strip() == '':
+    continue
+  trad_word = x.split(' ')[0]
+  simp_word = x.split(' ')[1]
+  if simp_word != trad_word and simp_word not in ce_dict_hash:
+    ce_dict_hash[simp_word] = x
+  ce_dict_hash[trad_word] = x
+
 def get_blacklist():
         '''
         word_counts = {}
@@ -70,7 +81,8 @@ def get_blacklist():
         '''
         return [u'fig', u'one', u'with', u'variant', u'also', u'into', u'abbr', u'have', u'not', u'get', u'China', u'prefecture', u'level', u'from', u'out', u'for', u'take', u'an', u'as', u'at', u'see', u'be', u'by', u'all', u'the', u'eg', u'surname', u'used', u'go', u'written', u'county', u'is', u'it', u'in', u'and', u'on', u'of', u'or', u'idiom', u'oneself', u'Taiwan', u'sb', u'city', u'to', u'person', u'up', u'Tibetan', u'make', u'Chinese', u'Sichuan', u'Japanese', u'name', u'place', u'district', u'capital', u'old', u'time', u'etc', u'that', u'a', u'sth', u'lit', u'state', u'autonomous', u'over', u'water', u'ones']
 
-@memoized
+splitting_regex = re.compile('[%s]' % re.escape(string.punctuation))
+
 def get_english_definitions(word):
         '''
         Returns a list of the possible english meanings of a chinese word.
@@ -79,12 +91,10 @@ def get_english_definitions(word):
         returns -1 if not matches were found
         '''
         uni_word = word.decode('utf-8')
-        regex = re.compile('[%s]' % re.escape(string.punctuation))
-        for definition in ce_dict:
-                index = definition.find(uni_word)
-                if index == 0:
-                        return [regex.sub('', meaning) for meaning in definition.split("/")[1:-1]]
-        return -1
+        if uni_word not in ce_dict_hash:
+          return -1
+        definition = ce_dict_hash[uni_word]
+        return [splitting_regex.sub('', meaning) for meaning in definition.split("/")[1:-1]]
 
 def get_salient_english_words(definition, blacklist):
         '''
@@ -129,6 +139,14 @@ def find_common_words(list1,list2):
 			if word in list2:
 				return True
 	return False
+
+@memoized
+def get_english_translation_for_chinese_training_sentences():
+  (chinese_sents, english_sents) = read_all_the_files()
+  chinese_to_english = {}
+  for chinese_sent,english_sent in zip(chinese_sents, english_sents):
+    chinese_to_english[chinese_sent] = english_sent
+  return chinese_to_english
 
 def build_chinese_word_sent_dict(read_start, read_end, prev_dict):
     '''
@@ -230,7 +248,7 @@ def baseline_is_correct(c_word, index, baseline_dict):
 		return False
 
 def main(args):
-	c_sent_dict = build_chinese_word_sent_dict(0, 3500, {})
+	c_sent_dict = build_chinese_word_sent_dict(0, 10000, {})
 	print "REFERENCE DICTIONARY BUILT, MAKING BASELINE..."
 	prev_dict = get_most_common_index_dictionary(c_sent_dict)
 	print "BASELINE DONE, SCORING NEXT SET.."
@@ -238,3 +256,4 @@ def main(args):
 
 if __name__ == '__main__':
     main(sys.argv)
+    
