@@ -26,7 +26,7 @@ def get_test_words(read_start, read_end):
             #check if word can be classified
             utf = c_word.encode('utf-8')
             if (utf in classifiable_words):
-                if utf in test_words.keys():
+                if utf in test_words:
                     test_words[utf].append(i)
                 else:
                     test_words[utf] = [i]
@@ -58,7 +58,7 @@ def classify_test_words(n,ign):
         #print "WORD", word
         sentences = []
         for sent_i in test_words[word]:
-            sentences.append(chinese_sents[s[sent_i]])
+            sentences.append(chinese_sents[sent_i])
         sent_vec = build_sentence_vector(sentences)
         for sent_i in test_words[word]:
             classifier = classifiers[word][0]
