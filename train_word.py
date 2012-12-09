@@ -2,12 +2,27 @@ import sys, string, re
 import ref_definitions2
 import numpy as np
 import mlpy
+import ref_definitions2 as ref
 import matplotlib.pyplot as plt 
 import json
+reload(sys)
+sys.setdefaultencoding("utf-8")
 # Input: Training data (sentences) corresponding to a chinese word
 # Returns:
 # 1) The trained linear svm associated with the word
 # 2) The feature vector used to train the svm
+def build_all_the_files(num_test,num_training,n):
+       chinese_sents,english_sents = ref.read_all_the_files(n)
+       with open('chinese_sents.json', 'wb') as fp:
+              json.dump(chinese_sents,fp)
+       build_occurence_dict(0,num_test)
+       test_ref = ref.build_chinese_word_sent_dict(num_test, num_test+num_training,{},n)
+       with open('test_ref_dict.json', 'wb') as fp:
+              json.dump(test_ref,fp)
+       train_data = ref.build_chinese_word_sent_dict(0,num_test,{},n)
+       with open('train_data.json', 'wb') as fp:
+              json.dump(train_data,fp)
+       build_cooccurrence_dict()
 def build_occurence_dict(read_start,read_end):
        occurence_dict = {}
        with open('chinese_sents.json', 'rb') as fp:
@@ -21,8 +36,30 @@ def build_occurence_dict(read_start,read_end):
                      else:
                             occurence_dict[c_word] = 1
        with open('occurence_data.json', 'wb') as fp:
-              json.dump(occurence_dict,fp)
+              json.dump(occurence_dict,fp,)
        return occurence_dict
+def build_cooccurrence_dict():
+       with open('train_data.json', 'rb') as fp:
+              dictionary = json.load(fp)
+              dictionary = dict([(k.encode('utf-8'),v) for k,v in dictionary.items()])
+       with open('chinese_sents.json', 'rb') as fp:
+              chinese_sents = json.load(fp)
+       with open('test_ref_dict.json', 'rb') as fp:
+              ref_dict = json.load(fp)
+              ref_dict = dict([(k.encode('utf-8'),v) for k,v in ref_dict.items()])
+       words_train = dictionary.keys()
+       words_ref = ref_dict.keys()
+       can_eval_words = list(set(words_train) & set(words_ref))
+
+       d = {}
+       for word in can_eval_words:
+              sentences = []
+              info = dictionary[word]
+              for s in info:
+                     sentences.append(chinese_sents[s[0]])
+              d[word] = get_total_cooccurence(word,sentences)
+       with open('cooccurence_data.json', 'wb') as fp:
+              json.dump(d,fp,ensure_ascii = False,encoding = 'utf-8')
 
 def get_total_cooccurence(word,sentences):
        #print "WORD", word
@@ -42,30 +79,30 @@ def get_total_cooccurence(word,sentences):
                      else:
                             cooccurence_data[w] = 1
        return cooccurence_data
-def get_important_features(word,sentences):
-       cooccurence_data = get_total_cooccurence(word,sentences)
+def get_important_features(word,cooccur_data):
+       #cooccurence_data = get_total_cooccurence(word,sentences)
        with open('occurence_data.json', 'rb') as fp:
               occurence_data = json.load(fp)
        features = {}
-       for word in cooccurence_data:
+       for w in cooccur_data:
               #print "cooccur", cooccurence_data[word]
               #print "all", occurence_data[word]
-              features[word] = float(cooccurence_data[word])/occurence_data[word]
+              features[w] = float(cooccur_data[w])/occurence_data[w]
               #print "value", features[word]
        return features
-def get_top_features(thresh,word,sentences):
-       features = get_important_features(word,sentences)
+def get_top_features(thresh,word,cooccur_data):
+       features = get_important_features(word,cooccur_data)
        sorted_features = sorted(features, key=features.get)
        sorted_features.reverse()
 
-       # stop_pos = 0
-       # for i in range(len(sorted_features)):
-       #        f = sorted_features[i]
-       #        if(features[f] < thresh):
-       #               stop_pos = i
-       #               break
-       # n = max(10,stop_pos)
-       n = thresh
+       stop_pos = 0
+       for i in range(len(sorted_features)):
+              f = sorted_features[i]
+              if(features[f] < thresh):
+                     stop_pos = i
+                     break
+       n = max(10,stop_pos)
+       #n = thresh
        if(n > len(features)):
               n = len(features)
 
@@ -99,10 +136,18 @@ def get_classifiers(n):
        print "LEN",len(dictionary)
        with open('chinese_sents.json', 'rb') as fp:
               chinese_sents = json.load(fp)
-       
+       with open('test_ref_dict.json', 'rb') as fp:
+              ref_dict = json.load(fp)
+              ref_dict = dict([(k.encode('utf-8'),v) for k,v in ref_dict.items()])
+       with open('cooccurence_data.json', 'rb') as fp:
+              cooccur_data = json.load(fp)
+              cooccur_data = dict([(k.encode('utf-8'),v) for k,v in cooccur_data.items()])
        #print dictionary.keys()
        classifiers = {}
-       for word in dictionary.keys():
+       words_train = dictionary.keys()
+       words_ref = ref_dict.keys()
+       can_eval_words = list(set(words_train) & set(words_ref))
+       for word in can_eval_words:
               #print "word", word
        #word = '\xe5\x8f\x83\xe5\x8a\xa0'
        #xs, y is last element
@@ -113,7 +158,7 @@ def get_classifiers(n):
               sentences = []
               for s in info:
                      sentences.append(chinese_sents[s[0]])
-              words_vec = get_top_features(n,word,sentences)
+              words_vec = get_top_features(n,word,cooccur_data[word])
               for s in info:
                      #Create observation vector
                      observation_vec = build_observation_vector(words_vec,chinese_sents[s[0]]);

@@ -126,8 +126,8 @@ def get_best_definition_index(english_words, words_in_each_def):
         else:
                 return(best_choice, 0)
 
-def read_all_the_files():
-        return parse_corpora.get_alignments(30)
+def read_all_the_files(n):
+        return parse_corpora.get_alignments(n)
 
 def segment_sent(c_sent):
         return c_sent.split(' ')
@@ -142,13 +142,13 @@ def find_common_words(list1,list2):
 
 @memoized
 def get_english_translation_for_chinese_training_sentences():
-  (chinese_sents, english_sents) = read_all_the_files()
+  (chinese_sents, english_sents) = read_all_the_files(n)
   chinese_to_english = {}
   for chinese_sent,english_sent in zip(chinese_sents, english_sents):
     chinese_to_english[chinese_sent] = english_sent
   return chinese_to_english
 
-def build_chinese_word_sent_dict(read_start, read_end, prev_dict):
+def build_chinese_word_sent_dict(read_start, read_end, prev_dict,n):
     '''
     This will map a single chinese word to 
     a tuple - (sentence_index,english_meaning)
@@ -157,7 +157,7 @@ def build_chinese_word_sent_dict(read_start, read_end, prev_dict):
     '''
     blacklist = set(get_blacklist() + stopwords)
     chinese_word_sent_dict = {}                
-    (chinese_sents, english_sents) = read_all_the_files()
+    (chinese_sents, english_sents) = read_all_the_files(n)
     undefined_words = 0
     defined_words = 0
     correct = 0
