@@ -12,6 +12,14 @@ def get_c_words():
         train_dict = dict([(k.encode('utf-8'),v) for k,v in train_dict.items()])
     #classifiable_words = train_dict.keys()
     return train_dict
+def uniquify(l):
+    unique_elems = set()
+    output = []
+    for x in l:
+        if x not in unique_elems:
+            unique_elems.add(x)
+            output.append(x)
+    return output
 def get_test_words(read_start, read_end):
     with open('train_data.json', 'rb') as fp:
         train_dict = json.load(fp)
@@ -21,24 +29,26 @@ def get_test_words(read_start, read_end):
     for i in range(read_start, read_end):
         c_sent = chinese_sents[i]
         c_sent_words = c_sent.split(' ')
-        c_sent_words = list(set(c_sent_words))
+        c_sent_words = uniquify(c_sent_words)
         for c_word in c_sent_words:
             #check if word can be classified
             utf = c_word.encode('utf-8')
             if (utf in classifiable_words):
-                if utf in test_words.keys():
+                if utf in test_words:
                     test_words[utf].append(i)
                 else:
                     test_words[utf] = [i]
     return test_words
 def build_sentence_vector(sentences):
-       words_set = set([])
+       word_set = set()
+       word_list = []
        for s in sentences:
               words = s.split(' ')
-              words_set.update(words)
-       words_set.discard('')
-       words_ls = list(words_set)
-       return words_ls
+              for word in words:
+                     if word not in word_set and word != '':
+                            word_set.add(word)
+                            word_list.append(word)
+       return word_list
 def build_observation_vector(words_vec,sentence):
        vector = []
        for word in words_vec:
