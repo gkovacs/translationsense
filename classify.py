@@ -29,33 +29,16 @@ def get_test_words():
         for data in info:
             test_words[word].append(data[0])
     return test_words 
-# def get_test_words(read_start, read_end):
-#     with open('train_data.json', 'rb') as fp:
-#         train_dict = json.load(fp)
-#         train_dict = dict([(k.encode('utf-8'),v) for k,v in train_dict.items()])
-#     classifiable_words = train_dict.keys()
-#     test_words = {}
-#     for i in range(read_start, read_end):
-#         c_sent = chinese_sents[i]
-#         c_sent_words = c_sent.split(' ')
-#         c_sent_words = list(set(c_sent_words))
-#         for c_word in c_sent_words:
-#             #check if word can be classified
-#             utf = c_word.encode('utf-8')
-#             if (utf in classifiable_words):
-#                 if utf in test_words:
-#                     test_words[utf].append(i)
-#                 else:
-#                     test_words[utf] = [i]
-#     return test_words
 def build_sentence_vector(sentences):
-       words_set = set([])
+       word_set = set()
+       word_list = []
        for s in sentences:
               words = s.split(' ')
-              words_set.update(words)
-       words_set.discard('')
-       words_ls = list(words_set)
-       return words_ls
+              for word in words:
+                     if word not in word_set and word != '':
+                            word_set.add(word)
+                            word_list.append(word)
+       return word_list
 def build_observation_vector(words_vec,sentence):
        vector = []
        for word in words_vec:
@@ -134,18 +117,35 @@ def evaluate_most_common(n,ign):
     pred_count = 0
     results = classify_test_words(n,ign)
     classified_words = results[0]
+    print 'started training most_common_classifier'
     most_common = most_common_classifier()
+    print 'most_common_classifier has been trained'
+    word_and_sent_i_to_meaning = {}
+    for word in classified_words:
+      if word in ref_dict:
+        if word not in word_and_sent_i_to_meaning:
+          word_and_sent_i_to_meaning[word] = {}
+        ref_meanings = ref_dict[word]
+        for meaning in ref_meanings:
+          sent_i = meaning[0]
+          word_and_sent_i_to_meaning[word][sent_i] = meaning[1]
+    
     for word in classified_words:
         for test_pred in classified_words[word]:
             sent_i = test_pred[0]
             prediction = most_common[word]
             if (word in ref_dict):
+                if prediction == word_and_sent_i_to_meaning[word][sent_i]:
+                  correct_pred_count += 1
+                pred_count += 1
+                '''
                 ref_meanings = ref_dict[word]
                 for meaning in ref_meanings:
                     if meaning[0] == sent_i:
                         if meaning[1] == prediction:
                             correct_pred_count += 1
                         pred_count += 1
+                '''
     print "total # of correct predictions: %s" % correct_pred_count
     print "total # of prediction attempts: %s" % pred_count
     return correct_pred_count,pred_count
@@ -158,6 +158,7 @@ def evaluate_presense_feature(n,ign):
     pred_count = 0
     results = classify_test_words(n,ign)
     classified_words = results[0]
+    
     for word in classified_words:
         for test_pred in classified_words[word]:
             sent_i = test_pred[0]
