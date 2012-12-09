@@ -121,18 +121,35 @@ def evaluate_most_common(n,ign):
     pred_count = 0
     results = classify_test_words(n,ign)
     classified_words = results[0]
+    print 'started training most_common_classifier'
     most_common = most_common_classifier()
+    print 'most_common_classifier has been trained'
+    word_and_sent_i_to_meaning = {}
+    for word in classified_words:
+      if word in ref_dict:
+        if word not in word_and_sent_i_to_meaning:
+          word_and_sent_i_to_meaning[word] = {}
+        ref_meanings = ref_dict[word]
+        for meaning in ref_meanings:
+          sent_i = meaning[0]
+          word_and_sent_i_to_meaning[word][sent_i] = meaning[1]
+    
     for word in classified_words:
         for test_pred in classified_words[word]:
             sent_i = test_pred[0]
             prediction = most_common[word]
             if (word in ref_dict):
+                if prediction == word_and_sent_i_to_meaning[word][sent_i]:
+                  correct_pred_count += 1
+                pred_count += 1
+                '''
                 ref_meanings = ref_dict[word]
                 for meaning in ref_meanings:
                     if meaning[0] == sent_i:
                         if meaning[1] == prediction:
                             correct_pred_count += 1
                         pred_count += 1
+                '''
     print "total # of correct predictions: %s" % correct_pred_count
     print "total # of prediction attempts: %s" % pred_count
     return correct_pred_count,pred_count
@@ -146,6 +163,7 @@ def evaluate_presense_feature(n,ign):
     pred_count = 0
     results = classify_test_words(n,ign)
     classified_words = results[0]
+    
     for word in classified_words:
         for test_pred in classified_words[word]:
             sent_i = test_pred[0]
