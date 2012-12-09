@@ -10,14 +10,13 @@ def get_c_words():
     with open('train_data.json', 'rb') as fp:
         train_dict = json.load(fp)
         train_dict = dict([(k.encode('utf-8'),v) for k,v in train_dict.items()])
-    classifiable_words = train_dict.keys()
-    return classifiable_words
+    #classifiable_words = train_dict.keys()
+    return train_dict
 def get_test_words(read_start, read_end):
     with open('train_data.json', 'rb') as fp:
         train_dict = json.load(fp)
         train_dict = dict([(k.encode('utf-8'),v) for k,v in train_dict.items()])
     classifiable_words = train_dict.keys()
-
     test_words = {}
     for i in range(read_start, read_end):
         c_sent = chinese_sents[i]
@@ -48,10 +47,13 @@ def build_observation_vector(words_vec,sentence):
               else:
                      vector.append(0)
        return vector
-def classify_test_words():
-    classifiers = train.get_classifiers()
-    test_words = get_test_words(3500,5000)
+def classify_test_words(n,ign):
+    count_all_zero_features = 0
+    count_features = 0
+    classifiers = train.get_classifiers(n)
+    test_words = get_test_words(10000,12000)
     classified_words = {}
+    most_common = most_common_classifier()
     for word in test_words:
         #print "WORD", word
         for sent_i in test_words[word]:
@@ -61,20 +63,67 @@ def classify_test_words():
             test_feature_vec = build_observation_vector(feature_vec,sent_vec)
             # print "feature_vec", feature_vec
             # print "sent_vec", sent_vec
-            # print "obs_vec", test_feature_vec
-            pred = classifier.pred(test_feature_vec)
+            count_features += 1
+            count_zero = test_feature_vec.count(0)
+            if(count_zero >= (len(test_feature_vec)-ign)):
+                pred = most_common[word]
+                count_all_zero_features += 1
+            else:
+                pred = classifier.pred(test_feature_vec)
             if(word in classified_words):
                 classified_words[word].append([sent_i,pred])
             else:
                 classified_words[word] = [[sent_i,pred]]
     #print "classified words", classified_words
-    return classified_words
+    return classified_words,count_all_zero_features,count_features
 def get_ref():
     with open('test_ref_dict.json', 'rb') as fp:
         ref_dict = json.load(fp)
         ref_dict = dict([(k.encode('utf-8'),v) for k,v in ref_dict.items()])
     return ref_dict
-def evaluate():
+def most_common_classifier():
+    with open('train_data.json', 'rb') as fp:
+        train_dict = json.load(fp)
+        train_dict = dict([(k.encode('utf-8'),v) for k,v in train_dict.items()])
+    #classifiable_words = train_dict.keys()
+    most_common_classifier = {}
+    for word in train_dict:
+        classes = {}
+        classifications = train_dict[word]
+        for c in classifications:
+            if c[1] in classes:
+                classes[c[1]] += 1
+            else:
+                classes[c[1]] = 1
+        most_common = max(classes, key=classes.get)
+        most_common_classifier[word] = most_common
+    return most_common_classifier
+
+def evaluate_most_common(n,ign):
+    #ref_dict is build_chinese_word_sent_dict(3500,5000,{})
+    with open('test_ref_dict.json', 'rb') as fp:
+        ref_dict = json.load(fp)
+        ref_dict = dict([(k.encode('utf-8'),v) for k,v in ref_dict.items()])
+    correct_pred_count = 0
+    pred_count = 0
+    results = classify_test_words(n,ign)
+    classified_words = results[0]
+    most_common = most_common_classifier()
+    for word in classified_words:
+        for test_pred in classified_words[word]:
+            sent_i = test_pred[0]
+            prediction = most_common[word]
+            if (word in ref_dict):
+                ref_meanings = ref_dict[word]
+                for meaning in ref_meanings:
+                    if meaning[0] == sent_i:
+                        if meaning[1] == prediction:
+                            correct_pred_count += 1
+                        pred_count += 1
+    print "total # of correct predictions: %s" % correct_pred_count
+    print "total # of prediction attempts: %s" % pred_count
+    return correct_pred_count,pred_count
+def evaluate_presense_feature(n,ign):
     #ref_dict is build_chinese_word_sent_dict(3500,5000,{})
     with open('test_ref_dict.json', 'rb') as fp:
         ref_dict = json.load(fp)
@@ -82,7 +131,8 @@ def evaluate():
     correct_pred_count = 0
     correct_predictions = {}
     pred_count = 0
-    classified_words = classify_test_words()
+    results = classify_test_words(n,ign)
+    classified_words = results[0]
     for word in classified_words:
         for test_pred in classified_words[word]:
             sent_i = test_pred[0]
@@ -95,8 +145,18 @@ def evaluate():
                             correct_pred_count += 1
                             correct_predictions[word] = classified_words[word]
                         pred_count += 1
-                    
+    print "total # of all 0 observation vecs: %s" % results[1]
+    print "total # of observation vecs: %s" % results[2]
     print "total # of correct predictions: %s" % correct_pred_count
     print "total # of prediction attempts: %s" % pred_count
-
-
+    return correct_pred_count,pred_count
+def run_test():
+    n_list = [10,30,50,60,100]
+    for n in n_list:
+        for i in range(0,2):
+            print "N:",n
+            print "Ign:", i
+            print "common:"
+            print evaluate_most_common(n,i)
+            print "presense:"
+            print evaluate_presense_feature(n,i)
