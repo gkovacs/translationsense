@@ -56,10 +56,13 @@ def classify_test_words(n,ign):
     most_common = most_common_classifier()
     for word in test_words:
         #print "WORD", word
+        sentences = []
+        for sent_i in test_words[word]:
+            sentences.append(chinese_sents[s[sent_i]])
+        sent_vec = build_sentence_vector(sentences)
         for sent_i in test_words[word]:
             classifier = classifiers[word][0]
             feature_vec = classifiers[word][1]
-            sent_vec = build_sentence_vector([chinese_sents[sent_i]])
             test_feature_vec = build_observation_vector(feature_vec,sent_vec)
             # print "feature_vec", feature_vec
             # print "sent_vec", sent_vec
