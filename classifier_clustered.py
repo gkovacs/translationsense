@@ -1,5 +1,6 @@
 from classify_word_utils import *
 
+@memoized
 def word_similarity(word1, word2):
   both_occurred = get_training_corpus().sentence_idxes_both_words_occur_in(word1, word2)
   either_occurred = get_training_corpus().sentence_idxes_either_word_occurs_in(word1, word2)
