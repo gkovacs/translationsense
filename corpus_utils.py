@@ -152,7 +152,6 @@ def inverse_freq_score(w):
   wc = get_training_corpus().get_english_word_count(w)
   if wc == 0:
     return 0
-  print wc
   return 1.0/wc
 
 @memoized
