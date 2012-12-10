@@ -4,13 +4,10 @@ import json
 
 with open('chinese_sents.json', 'rb') as fp:
       chinese_sents = json.load(fp)
-def get_linear_svms():
-    return train.get_classifiers()
 def get_c_words():
     with open('train_data.json', 'rb') as fp:
         train_dict = json.load(fp)
         train_dict = dict([(k.encode('utf-8'),v) for k,v in train_dict.items()])
-    #classifiable_words = train_dict.keys()
     return train_dict
 def get_test_words():
     with open('train_data.json', 'rb') as fp:
@@ -19,9 +16,11 @@ def get_test_words():
     with open('test_ref_dict.json', 'rb') as fp:
         ref_dict = json.load(fp)
         ref_dict = dict([(k.encode('utf-8'),v) for k,v in ref_dict.items()])
+
     words_train = train_dict.keys()
     words_ref = ref_dict.keys()
     can_eval_words = list(set(words_train) & set(words_ref))
+    
     test_words = {}
     for word in can_eval_words:
         info = ref_dict[word]
@@ -85,11 +84,6 @@ def classify_test_words(n,ign):
                 classified_words[word] = [[sent_i,pred]]
     #print "classified words", classified_words
     return classified_words,count_all_zero_features,count_features
-def get_ref():
-    with open('test_ref_dict.json', 'rb') as fp:
-        ref_dict = json.load(fp)
-        ref_dict = dict([(k.encode('utf-8'),v) for k,v in ref_dict.items()])
-    return ref_dict
 def most_common_classifier():
     with open('train_data.json', 'rb') as fp:
         train_dict = json.load(fp)
@@ -120,32 +114,17 @@ def evaluate_most_common(n,ign):
     print 'started training most_common_classifier'
     most_common = most_common_classifier()
     print 'most_common_classifier has been trained'
-    word_and_sent_i_to_meaning = {}
-    for word in classified_words:
-      if word in ref_dict:
-        if word not in word_and_sent_i_to_meaning:
-          word_and_sent_i_to_meaning[word] = {}
-        ref_meanings = ref_dict[word]
-        for meaning in ref_meanings:
-          sent_i = meaning[0]
-          word_and_sent_i_to_meaning[word][sent_i] = meaning[1]
-    
     for word in classified_words:
         for test_pred in classified_words[word]:
             sent_i = test_pred[0]
             prediction = most_common[word]
             if (word in ref_dict):
-                if prediction == word_and_sent_i_to_meaning[word][sent_i]:
-                  correct_pred_count += 1
-                pred_count += 1
-                '''
                 ref_meanings = ref_dict[word]
                 for meaning in ref_meanings:
                     if meaning[0] == sent_i:
                         if meaning[1] == prediction:
                             correct_pred_count += 1
                         pred_count += 1
-                '''
     print "total # of correct predictions: %s" % correct_pred_count
     print "total # of prediction attempts: %s" % pred_count
     return correct_pred_count,pred_count

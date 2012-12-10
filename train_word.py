@@ -9,7 +9,8 @@ reload(sys)
 sys.setdefaultencoding("utf-8")
 
 
-
+with open('cooccurence_data.json', 'rb') as fp:
+       c_data = json.load(fp)
 '''
 Build commonly used files:
 num_test = the number of training sentences to use
@@ -133,24 +134,21 @@ def get_top_features(thresh,word,cooccur_data):
        #print "edge value:", features[sorted_features[n-1]]
        #print "N", n
        return sorted_features[:n]
-# def build_sentence_vector(word,sentences):
-#        words_set = set([])
-#        for s in sentences:
-#               words = s.split(' ')
-#               words_set.update(words)
-#        words_set.discard('')
-#        words_ls = list(words_set)
-#        return words_ls
-
-#Builds simplest feature vector - presence/absence of a word in the sentence.
 '''
 Given the feature vector and the input observed sentence, builds the feature vector for the sentence.
 '''
-def build_observation_vector(words_vec,sentence):
+def build_observation_vector(words_vec,sentence,cooccur_data):
+       # vector = []
+       # for word in words_vec:
+       #        if word in sentence:
+       #               vector.append(1)
+       #        else:
+       #               vector.append(0)
+       # return vector
        vector = []
-       for word in words_vec:
-              if word in sentence:
-                     vector.append(1)
+       for w in words_vec:
+              if w in sentence:
+                     vector.append(cooccur_data[w])
               else:
                      vector.append(0)
        return vector
@@ -189,7 +187,7 @@ def get_classifiers(n):
               words_vec = get_top_features(n,word,cooccur_data[word])
               for s in info:
                      #Create observation vector
-                     observation_vec = build_observation_vector(words_vec,chinese_sents[s[0]]);
+                     observation_vec = build_observation_vector(words_vec,chinese_sents[s[0]],cooccur_data[word]);
                      obs.append(observation_vec)
                      #obs[len(obs)-1].append(s[1])
                      labels.append(s[1])
