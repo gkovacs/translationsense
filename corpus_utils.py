@@ -135,11 +135,11 @@ def get_words_in_chinese_sentence(chinese_sentence):
 
 @memoized
 def get_training_data():
-  return parse_corpora.get_alignments(29, 0) # 0 through 29
+  return parse_corpora.get_alignments(49, 0) # 0 through 49
 
 @memoized
 def get_test_data():
-  return parse_corpora.get_alignments(10, 30) # 30 through 40
+  return parse_corpora.get_alignments(10, 50) # 50 through 60
 
 @memoized
 def get_training_corpus():
