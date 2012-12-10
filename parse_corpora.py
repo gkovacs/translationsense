@@ -96,7 +96,7 @@ def get_sentence_pairs(alignment_file,segmented_chinese_file,english_file):
 		return (chinese_sents,english_sents)
 		pass
 
-def get_alignments(number_of_files):
+def get_alignments(number_of_files, startidx=0):
 	if number_of_files > 345:
 		number_of_files = 345
 	alignment_files = os.listdir("./alignment")
@@ -104,7 +104,7 @@ def get_alignments(number_of_files):
 	english_files = os.listdir("./English")
 	chinese_sents = []
 	english_sents = []
-	for i in range(0,number_of_files):
+	for i in range(startidx,startidx+number_of_files):
 		alignment_file = alignment_files[i]
 		doc_id = new_doc_line(alignment_file)
 		sentence_pairs = get_sentence_pairs("./alignment/"+alignment_file,"./Chinese_seg/SINO"+doc_id+".seg.txt","./English/SINO"+doc_id+".sgm")
