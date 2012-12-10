@@ -66,6 +66,9 @@ class ParallelCorpus:
   def sentence_idxes_both_words_occur_in(self,word1,word2):
     return self.sentence_idxes_word_occurs_in(word1) & self.sentence_idxes_word_occurs_in(word2) # & is the set intersection operator
   
+  def sentence_idxes_either_word_occurs_in(self,word1,word2):
+    return self.sentence_idxes_word_occurs_in(word1) | self.sentence_idxes_word_occurs_in(word2) # | is the set union operator
+  
   @memoized
   def word_counts_in_corpus(self):
     word_counts = {}
@@ -80,6 +83,21 @@ class ParallelCorpus:
     if word in self.word_counts_in_corpus():
       return self.word_counts_in_corpus()[word]
     return 0
+
+  @memoized
+  def english_word_counts_in_corpus(self):
+    word_counts = {}
+    for sentence in self.english_sentences:
+      for word in get_salient_english_words(sentence):
+        if word not in word_counts:
+          word_counts[word] = 0
+        word_counts[word] += 1
+    return word_counts
+
+  def get_english_word_count(self, word):
+    if word in self.english_word_counts_in_corpus():
+      return self.english_word_counts_in_corpus()[word]
+    return word
 
   @memoized
   def get_reference_definition_idx_counts(self, word):
@@ -121,17 +139,21 @@ class ParallelCorpus:
     definition_scores = []
     for idx,definition in enumerate(list_definitions_for_word(word)):
       english_words_in_definition = get_salient_english_words(definition)
-      definition_score = len([word for word in english_words_in_definition if word in english_words_in_sent])
-      definition_scores.append((definition_score,idx))
-    bestscore,bestidx = max(definition_scores)
+      definition_score = sum([inverse_freq_score(word) for word in english_words_in_definition if word in english_words_in_sent])
+      #definition_score = sum([1.0 for word in english_words_in_definition if word in english_words_in_sent])
+      definition_scores.append((definition_score,-idx))
+    bestscore,negbestidx = max(definition_scores)
+    bestidx = -negbestidx
     if bestscore == 0:
       return -1
     return bestidx
 
-def get_words_in_chinese_sentence(chinese_sentence):
-  #return chinese_sentence.split()
-  words = re.findall(r'\S+', chinese_sentence)
-  return [word for word in words if word in get_dictionary()]
+def inverse_freq_score(w):
+  wc = get_training_corpus().get_english_word_count(w)
+  if wc == 0:
+    return 0
+  print wc
+  return 1.0/wc
 
 @memoized
 def get_training_data():

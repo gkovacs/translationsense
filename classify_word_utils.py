@@ -32,7 +32,7 @@ def get_cooccurring_words(word):
 '''
 
 @memoized
-def get_top_cooccurring_words(word, topn=100, threshold=0.0):
+def get_top_cooccurring_words(word, topn=50, threshold=0.3):
   cooccurring_word_counts = {}
   for sentence_idx in sorted(list(get_training_corpus().sentence_idxes_word_occurs_in(word))):
     sentence = get_training_corpus().get_sentence_at_idx(sentence_idx)

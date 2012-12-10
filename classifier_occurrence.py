@@ -3,6 +3,7 @@ from classify_word_utils import *
 class OccurrenceClassifier:
   def __init__(self, word):
     self.feature_words = get_top_cooccurring_words(word)
+    self.num_definitions_available = len(list_definitions_for_word(word))
     labels = []
     observations = []
     for sentence_idx in sorted(list(get_training_corpus().sentence_idxes_word_occurs_in(word))):
@@ -28,5 +29,11 @@ class OccurrenceClassifier:
     return features
   def get_definition_idx(self, sentence):
     features = self.extract_features(sentence)
-    return self.classifier.pred(features)
+    prediction = self.classifier.pred(features)
+    prediction = int(round(prediction))
+    if prediction >= self.num_definitions_available:
+      prediction = self.num_definitions_available - 1
+    if prediction < 0:
+      prediction = 0
+    return prediction
 

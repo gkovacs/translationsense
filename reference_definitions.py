@@ -58,4 +58,9 @@ def get_salient_english_words(text):
   words = re.findall(r'\w+', text) # warning, doesn't do the correct thing on Tōkyō (splits into [T, ky]), should use nltk tokenize instead
   return [word for word in words if word not in get_english_blacklist()]
 
+@memoized
+def get_words_in_chinese_sentence(chinese_sentence):
+  #return chinese_sentence.split()
+  words = re.findall(r'\S+', chinese_sentence)
+  return [word for word in words if word in get_dictionary()]
 

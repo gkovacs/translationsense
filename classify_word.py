@@ -19,6 +19,8 @@ import heapq
 
 from classifier_list import *
 
+import math
+
 def word_has_enough_reference_definitions(word, n=50):
   num_ref_definitions = 0
   for sentence_idx in sorted(list(get_training_corpus().sentence_idxes_word_occurs_in(word))):
@@ -71,9 +73,17 @@ def main(args):
         continue
       classifier = getClassifier(classifierType, word) # can be changed to a different classifier type
       classified_definition_idx = classifier.get_definition_idx(sentence)
+      #print classified_definition_idx, reference_definition_idx
       num_word_instances += 1
       if classified_definition_idx == reference_definition_idx:
         num_word_instances_correctly_classified += 1
+      else:
+        print word
+        print 'correct:', list_definitions_for_word(word)[reference_definition_idx]
+        print 'incorrect:', list_definitions_for_word(word)[classified_definition_idx]
+        print 'sentence:', sentence
+        print 'translation:', get_test_corpus().get_english_sentence_for_chinese(sentence)
+        print ''
   print 'Number of skipped words:', skipped_words
   print 'Total number of word instances:', num_word_instances
   print 'Number of word instances correctly classified:', num_word_instances_correctly_classified
