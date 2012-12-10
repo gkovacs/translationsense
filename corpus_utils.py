@@ -65,13 +65,28 @@ class ParallelCorpus:
 
   def sentence_idxes_both_words_occur_in(self,word1,word2):
     return self.sentence_idxes_word_occurs_in(word1) & self.sentence_idxes_word_occurs_in(word2) # & is the set intersection operator
+  
+  @memoized
+  def word_counts_in_corpus(self):
+    word_counts = {}
+    for sentence in self.chinese_sentences:
+      for word in get_words_in_chinese_sentence(sentence):
+        if word not in word_counts:
+          word_counts[word] = 0
+        word_counts[word] += 1
+    return word_counts
+  
+  def get_word_count(self, word):
+    if word in self.word_counts_in_corpus():
+      return self.word_counts_in_corpus()[word]
+    return 0
 
   @memoized
   def get_reference_definition_idx_counts(self, word):
     definition_idx_to_count = {}
     for sentence_idx in sorted(list(self.sentence_idxes_word_occurs_in(word))):
       sentence = self.get_sentence_at_idx(sentence_idx)
-      definition_idx = get_reference_definition_idx(word, sentence)
+      definition_idx = self.get_reference_definition_idx(word, sentence)
       if definition_idx not in definition_idx_to_count:
         definition_idx_to_count[definition_idx] = 0
       definition_idx_to_count[definition_idx] += 1
@@ -96,25 +111,27 @@ class ParallelCorpus:
       return -1
     return argmax(definition_idx_to_count)
 
-def get_words_in_chinese_sentence(chinese_sentence):
-  return chinese_sentence.split()
+  def get_reference_definition_idx(self, word, chinese_sent):
+    '''
+    -1 if no reference definition idx was found
+    otherwise list_definitions_for_word(word)[val] will be the reference definition for the word
+    '''
+    english_sent = self.get_english_sentence_for_chinese(chinese_sent)
+    english_words_in_sent = set(get_salient_english_words(english_sent))
+    definition_scores = []
+    for idx,definition in enumerate(list_definitions_for_word(word)):
+      english_words_in_definition = get_salient_english_words(definition)
+      definition_score = len([word for word in english_words_in_definition if word in english_words_in_sent])
+      definition_scores.append((definition_score,idx))
+    bestscore,bestidx = max(definition_scores)
+    if bestscore == 0:
+      return -1
+    return bestidx
 
-def get_reference_definition_idx(word, chinese_sent):
-  '''
-  -1 if no reference definition idx was found
-  otherwise list_definitions_for_word(word)[val] will be the reference definition for the word
-  '''
-  english_sent = get_combined_corpus().get_english_sentence_for_chinese(chinese_sent)
-  english_words_in_sent = set(get_salient_english_words(english_sent))
-  definition_scores = []
-  for idx,definition in enumerate(list_definitions_for_word(word)):
-    english_words_in_definition = get_salient_english_words(definition)
-    definition_score = len([word for word in english_words_in_definition if word in english_words_in_sent])
-    definition_scores.append((definition_score,idx))
-  bestscore,bestidx = max(definition_scores)
-  if bestscore == 0:
-    return -1
-  return bestidx
+def get_words_in_chinese_sentence(chinese_sentence):
+  #return chinese_sentence.split()
+  words = re.findall(r'\S+', chinese_sentence)
+  return [word for word in words if word in get_dictionary()]
 
 @memoized
 def get_training_data():
@@ -134,9 +151,10 @@ def get_test_corpus():
   chinese_sentences,english_sentences = get_test_data()
   return ParallelCorpus(chinese_sentences, english_sentences)
 
+'''
 @memoized
 def get_combined_corpus():
   chinese_sentences_train,english_sentences_train = get_training_data()
   chinese_sentences_test,english_sentences_test = get_test_data()
   return ParallelCorpus(chinese_sentences_train + chinese_sentences_test, english_sentences_train + english_sentences_test)
-
+'''
