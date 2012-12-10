@@ -7,22 +7,30 @@ import matplotlib.pyplot as plt
 import json
 reload(sys)
 sys.setdefaultencoding("utf-8")
-# Input: Training data (sentences) corresponding to a chinese word
-# Returns:
-# 1) The trained linear svm associated with the word
-# 2) The feature vector used to train the svm
-def build_all_the_files(num_test,num_training,n):
+
+
+
+'''
+Build commonly used files:
+num_test = the number of training sentences to use
+num_training = the number of test senteces to use
+n = number of alignment files we are using
+'''
+def build_all_the_files(num_training,num_test,n):
        chinese_sents,english_sents = ref.read_all_the_files(n)
        with open('chinese_sents.json', 'wb') as fp:
               json.dump(chinese_sents,fp)
-       build_occurence_dict(0,num_test)
-       test_ref = ref.build_chinese_word_sent_dict(num_test, num_test+num_training,{},n)
+       build_occurence_dict(0,num_training)
+       test_ref = ref.build_chinese_word_sent_dict(num_training, num_test+num_training,{},n)
        with open('test_ref_dict.json', 'wb') as fp:
               json.dump(test_ref,fp)
-       train_data = ref.build_chinese_word_sent_dict(0,num_test,{},n)
+       train_data = ref.build_chinese_word_sent_dict(0,num_training,{},n)
        with open('train_data.json', 'wb') as fp:
               json.dump(train_data,fp)
        build_cooccurrence_dict()
+'''
+Build a dictionary. k => word, v => total # of occurences among the sentences spanned by read_start, read_end
+'''
 def build_occurence_dict(read_start,read_end):
        occurence_dict = {}
        with open('chinese_sents.json', 'rb') as fp:
@@ -38,6 +46,9 @@ def build_occurence_dict(read_start,read_end):
        with open('occurence_data.json', 'wb') as fp:
               json.dump(occurence_dict,fp,)
        return occurence_dict
+'''
+Called by build_all_the_files, builds dictionary, k => k_word, v => dictionary of words w that cooccur with the k_word in all the sentences containing the k_word in the test_corpus. The words in the dictionary are restricted to the intersection of words we have reference definitions for in the training and test data sets. 
+'''
 def build_cooccurrence_dict():
        with open('train_data.json', 'rb') as fp:
               dictionary = json.load(fp)
@@ -60,7 +71,11 @@ def build_cooccurrence_dict():
               d[word] = get_total_cooccurence(word,sentences)
        with open('cooccurence_data.json', 'wb') as fp:
               json.dump(d,fp,ensure_ascii = False,encoding = 'utf-8')
+'''
+Called by build_cooccurrence_dict.
+Given a t_word and a list of sentences containing the t_word , returns a dictionary of cooccuring words mapped to the number of the coocurrences with t_word 
 
+'''
 def get_total_cooccurence(word,sentences):
        #print "WORD", word
        #print "sentences", sentences
@@ -79,6 +94,10 @@ def get_total_cooccurence(word,sentences):
                      else:
                             cooccurence_data[w] = 1
        return cooccurence_data
+'''
+Called by get_top_features.
+Given cooccurence data and t_word, returns the list of features (cooccuring words) sorted in order of importance (# of cooccurences/total # of occurences -in training)
+'''
 def get_important_features(word,cooccur_data):
        #cooccurence_data = get_total_cooccurence(word,sentences)
        with open('occurence_data.json', 'rb') as fp:
@@ -90,6 +109,9 @@ def get_important_features(word,cooccur_data):
               features[w] = float(cooccur_data[w])/occurence_data[w]
               #print "value", features[word]
        return features
+'''
+Gets the features with importance value over thresh.
+'''
 def get_top_features(thresh,word,cooccur_data):
        features = get_important_features(word,cooccur_data)
        sorted_features = sorted(features, key=features.get)
@@ -121,6 +143,9 @@ def get_top_features(thresh,word,cooccur_data):
 #        return words_ls
 
 #Builds simplest feature vector - presence/absence of a word in the sentence.
+'''
+Given the feature vector and the input observed sentence, builds the feature vector for the sentence.
+'''
 def build_observation_vector(words_vec,sentence):
        vector = []
        for word in words_vec:
@@ -129,6 +154,9 @@ def build_observation_vector(words_vec,sentence):
               else:
                      vector.append(0)
        return vector
+'''
+Returns the classifiers for evaluable words(intersection of training and test words which we have reference definitions for). The result is dictionary k => t_word, v => (the classifier, the feature vector used)
+'''
 def get_classifiers(n):
        with open('train_data.json', 'rb') as fp:
               dictionary = json.load(fp)
