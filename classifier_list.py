@@ -7,8 +7,8 @@ from classifier_postag import *
 from classifier_postag_occurrence import *
 
 @memoized
-def getClassifier(classifierType, word,topn,thresh):
-  return classifierType(word,topn,thresh)
+def getClassifier(classifierType, word,fv_size_scale,thresh):
+  return classifierType(word,fv_size_scale,thresh)
 
 def getClassifierByName(name):
   name = name.lower()

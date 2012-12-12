@@ -1,11 +1,11 @@
 from classify_word_utils import *
 from corpus_utils import *
 class OccurrenceClassifier:
-  def __init__(self, word,topn, thresh):
+  def __init__(self, word,fv_size_scale, thresh):
     self.word = word
     self.observations = self.get_num_observations()
     print "NUM OBS:", self.observations
-    self.feature_words = self.get_feature_words((int)(round(self.observations*topn)),thresh)
+    self.feature_words = self.get_feature_words((int)(round(self.observations*fv_size_scale)),thresh)
     self.num_definitions_available = len(list_definitions_for_word(word))
     labels = []
     observations = []
@@ -31,8 +31,8 @@ class OccurrenceClassifier:
         continue
       observations += 1
     return observations
-  def get_feature_words(self,topn,thresh):
-    meaning_segregated_features = self.get_top_features_by_meaning(topn,thresh)
+  def get_feature_words(self,fv_size_scale,thresh):
+    meaning_segregated_features = self.get_top_features_by_meaning(fv_size_scale,thresh)
     unique_features = []
     for meaning in meaning_segregated_features.keys():
       #print "MEANING:", meaning
@@ -49,7 +49,7 @@ class OccurrenceClassifier:
     # for f in meaning_segregated_features.values():
     #   combination_features += f
     # return combination_features
-  def get_top_features_by_meaning(self,topn,thresh):
+  def get_top_features_by_meaning(self,fv_size_scale,thresh):
     meaning_sentence_dict = {}
     meanings = 0
     for sentence_idx in sorted(list(get_training_corpus().sentence_idxes_word_occurs_in(self.word))):
@@ -67,7 +67,7 @@ class OccurrenceClassifier:
     length = 0
     for meaning in meaning_sentence_dict.keys():
       sentences = meaning_sentence_dict[meaning]
-      meaning_top_features_dict[meaning] = get_top_cooccurring_words_for_meaning(self.word,sentences,topn,thresh)
+      meaning_top_features_dict[meaning] = get_top_cooccurring_words_for_meaning(self.word,sentences,fv_size_scale,thresh)
       #print "meaning", meaning
       #print "features", meaning_top_features_dict[meaning]
       length += len(meaning_top_features_dict[meaning])

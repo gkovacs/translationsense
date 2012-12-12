@@ -1,8 +1,8 @@
 from classify_word_utils import *
 from corpus_utils import *
 class OccurrenceClassifier:
-  def __init__(self, word,topn, thresh):
-    self.feature_words = get_top_cooccurring_words(word,topn,thresh)
+  def __init__(self, word,fv_size_scale, thresh):
+    self.feature_words = get_top_cooccurring_words(word,fv_size_scale,thresh)
     self.num_definitions_available = len(list_definitions_for_word(word))
     labels = []
     observations = []

@@ -87,15 +87,17 @@ def main(args):
 
   #c = OccurrenceClassifier
   classifiers = [MaxCountClassifier, OccurrenceClassifier]
-  # for c in classifiers:
-  #   print "CLASSIFIER:", c
-  #   run_test_single_word('研究所',c,1,0.0,100,0.0,1)
+  for c in classifiers:
+     print "CLASSIFIER:", c
+     run_test_single_word('研究所',c,1,0.0,100,0.0,1)
+  '''
   ratio = [1,2,3]
   for r in ratio:
     print "MAJ THRESH" , r
     for c in classifiers:
       print "CLASSIFIER:", c
       run_test(c,r,0,50,0.35,10)
+  '''
   # print "-----------------------------------------------------"
   #   run_test(c,feature_vector_pare_down_size,
   #     freq_threshold,
@@ -142,14 +144,14 @@ def main(args):
   #       number_of_stop_words,
   #       non_maj_thresh,
   #       rd)
-def run_test_single_word(word, classifier, topn,thresh,num_stop,non_maj_thresh,ref_data_req):
+def run_test_single_word(word, classifier, fv_size_scale,thresh,num_stop,non_maj_thresh,ref_data_req):
   # arg 1: classifier name
   top_word_freq =  get_training_corpus().get_top_words(num_stop)
   top_word_list = [word for f,word in top_word_freq]
 
   classifierType = classifier
   print classifierType
-  print "feature vector size %s" % topn
+  print "feature vector size %s" % fv_size_scale
   print "freq thresh %s" % thresh
   print "number of stop words to eliminate %s" % num_stop
   print "none majority threshold %s" % non_maj_thresh
@@ -173,7 +175,7 @@ def run_test_single_word(word, classifier, topn,thresh,num_stop,non_maj_thresh,r
     reference_definition_idx = get_test_corpus().get_reference_definition_idx(word, sentence)
     if reference_definition_idx == -1: # no reference definition available for this word instance
       continue
-    classifier = getClassifier(classifierType, word,topn,thresh) # can be changed to a different classifier type
+    classifier = getClassifier(classifierType, word,fv_size_scale,thresh) # can be changed to a different classifier type
     classified_definition_idx = classifier.get_definition_idx(sentence)
     #print classified_definition_idx, reference_definition_idx
     num_word_instances += 1
@@ -188,7 +190,7 @@ def run_test_single_word(word, classifier, topn,thresh,num_stop,non_maj_thresh,r
       # print 'translation:', get_test_corpus().get_english_sentence_for_chinese(sentence)
       # print ''
   default_features = classifier.get_feature_vector()
-  meaning_segregated_features = classifier.get_top_features_by_meaning(topn,thresh)
+  meaning_segregated_features = classifier.get_top_features_by_meaning(fv_size_scale,thresh)
   # print 'feature_vector', default_features
   # print 'feature vector len', len(default_features)
   # print 'observations', classifier.get_observation_vectors()
@@ -216,14 +218,14 @@ def run_test_single_word(word, classifier, topn,thresh,num_stop,non_maj_thresh,r
   print 'Total number of word instances:', num_word_instances
   print 'Number of word instances correctly classified:', num_word_instances_correctly_classified
   print "accuracy: %s" % (num_word_instances_correctly_classified / float(num_word_instances))
-def run_test(classifier, topn,thresh,num_stop,non_maj_thresh,ref_data_req):
+def run_test(classifier, fv_size_scale,thresh,num_stop,non_maj_thresh,ref_data_req):
   # arg 1: classifier name
   top_word_freq =  get_training_corpus().get_top_words(num_stop)
   top_word_list = [word for f,word in top_word_freq]
 
   classifierType = classifier
   print classifierType
-  print "feature vector size %s" % topn
+  print "feature vector size %s" % fv_size_scale
   print "freq thresh %s" % thresh
   print "number of stop words to eliminate %s" % num_stop
   print "none majority threshold %s" % non_maj_thresh
@@ -247,7 +249,7 @@ def run_test(classifier, topn,thresh,num_stop,non_maj_thresh,ref_data_req):
       reference_definition_idx = get_test_corpus().get_reference_definition_idx(word, sentence)
       if reference_definition_idx == -1: # no reference definition available for this word instance
         continue
-      classifier = getClassifier(classifierType, word,topn,thresh) # can be changed to a different classifier type
+      classifier = getClassifier(classifierType, word,fv_size_scale,thresh) # can be changed to a different classifier type
       classified_definition_idx = classifier.get_definition_idx(sentence)
       #print classified_definition_idx, reference_definition_idx
       num_word_instances += 1
