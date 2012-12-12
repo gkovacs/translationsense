@@ -4,12 +4,12 @@ class OccurrenceClassifier:
   def __init__(self, word,fv_size_scale, thresh):
     self.word = word
     self.observations = self.get_num_observations()
-    print "NUM OBS:", self.observations
+    #print "NUM OBS:", self.observations
     self.feature_words = self.get_feature_words((int)(round(self.observations*fv_size_scale)),thresh)
     self.num_definitions_available = len(list_definitions_for_word(word))
     labels = []
     observations = []
-    for sentence_idx in sorted(list(get_training_corpus().sentence_idxes_word_occurs_in(word))):
+    for sentence_idx in get_training_corpus().sentence_idxes_word_occurs_in(word):
       sentence = get_training_corpus().get_sentence_at_idx(sentence_idx)
       features = self.extract_features(sentence)
       most_common_reference_definition = get_training_corpus().get_reference_definition_idx(word, sentence)
@@ -24,7 +24,7 @@ class OccurrenceClassifier:
     self.classifier.learn(observations, labels)
   def get_num_observations(self):
     observations = 0
-    for sentence_idx in sorted(list(get_training_corpus().sentence_idxes_word_occurs_in(self.word))):
+    for sentence_idx in get_training_corpus().sentence_idxes_word_occurs_in(self.word):
       sentence = get_training_corpus().get_sentence_at_idx(sentence_idx)
       most_common_reference_definition = get_training_corpus().get_reference_definition_idx(self.word, sentence)
       if most_common_reference_definition == -1:
@@ -52,22 +52,22 @@ class OccurrenceClassifier:
   def get_top_features_by_meaning(self,fv_size_scale,thresh):
     meaning_sentence_dict = {}
     meanings = 0
-    for sentence_idx in sorted(list(get_training_corpus().sentence_idxes_word_occurs_in(self.word))):
+    for sentence_idx in list(get_training_corpus().sentence_idxes_word_occurs_in(self.word)):
       sentence = get_training_corpus().get_sentence_at_idx(sentence_idx)
       most_common_reference_definition = get_training_corpus().get_reference_definition_idx(self.word, sentence)
       if most_common_reference_definition == -1:
         continue
-      if most_common_reference_definition in meaning_sentence_dict:
-        meaning_sentence_dict[most_common_reference_definition] += sentence
+      if most_common_reference_definition not in meaning_sentence_dict:
+        meaning_sentence_dict[most_common_reference_definition] = []
       else:
         meanings += 1
-        meaning_sentence_dict[most_common_reference_definition] = sentence
+        meaning_sentence_dict[most_common_reference_definition].append(sentence)
     #print "sentence_dict", meaning_sentence_dict
     meaning_top_features_dict = {}
     length = 0
     for meaning in meaning_sentence_dict.keys():
       sentences = meaning_sentence_dict[meaning]
-      meaning_top_features_dict[meaning] = get_top_cooccurring_words_for_meaning(self.word,sentences,fv_size_scale,thresh)
+      meaning_top_features_dict[meaning] = get_top_cooccurring_words_for_meaning(self.word, ' '.join(sentences),fv_size_scale,thresh)
       #print "meaning", meaning
       #print "features", meaning_top_features_dict[meaning]
       length += len(meaning_top_features_dict[meaning])
@@ -89,7 +89,7 @@ class OccurrenceClassifier:
     return self.feature_words
   def get_definition_idx(self, sentence):
     features = self.extract_features(sentence)
-    print "features",features
+    #print "features",features
     prediction = self.classifier.pred(features)
     prediction = int(round(prediction))
     if prediction >= self.num_definitions_available:

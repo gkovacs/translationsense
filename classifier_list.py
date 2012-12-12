@@ -7,7 +7,7 @@ from classifier_postag import *
 from classifier_postag_occurrence import *
 
 @memoized
-def getClassifier(classifierType, word,fv_size_scale,thresh):
+def getClassifier(classifierType, word,fv_size_scale=1.0,thresh=0.0):
   return classifierType(word,fv_size_scale,thresh)
 
 def getClassifierByName(name):

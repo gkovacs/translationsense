@@ -11,7 +11,7 @@ def pos_to_feature_vector(postag):
   return features
 
 class POSTagClassifier:
-  def __init__(self, word):
+  def __init__(self, word, fv_size_scale, thresh):
     self.num_definitions_available = len(list_definitions_for_word(word))
     self.word = word
     labels = []
