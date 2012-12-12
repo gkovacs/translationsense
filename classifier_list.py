@@ -4,6 +4,7 @@ from classifier_fraction import *
 from classifier_clustered import *
 from classifier_xinyi import *
 from classifier_postag import *
+from classifier_postag_occurrence import *
 
 @memoized
 def getClassifier(classifierType, word):
@@ -15,6 +16,8 @@ def getClassifierByName(name):
     return MaxCountClassifier
   elif 'fraction' in name:
     return FractionOccurrenceClassifier
+  elif 'posoccurrence' in name:
+    return POSTagOccurrenceClassifier
   elif 'occurrence' in name:
     return OccurrenceClassifier
   elif 'cluster' in name:
