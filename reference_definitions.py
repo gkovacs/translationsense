@@ -8,7 +8,13 @@ sys.setdefaultencoding("utf-8")
 from memoized import memoized
 import re
 
+#from redis_memo import redismemo
+
 import parse_corpora
+
+import stanford
+
+import json
 
 DICTIONARY_FILE = "./cedict_full.txt"
 @memoized
@@ -58,9 +64,57 @@ def get_salient_english_words(text):
   words = re.findall(r'\w+', text) # warning, doesn't do the correct thing on Tōkyō (splits into [T, ky]), should use nltk tokenize instead
   return [word for word in words if word not in get_english_blacklist()]
 
+def segment_chinese_sentence(chinese_sentence):
+  #return re.findall(r'\S+', chinese_sentence)
+  return [word for word in chinese_sentence.split() if word != '']
+
 @memoized
 def get_words_in_chinese_sentence(chinese_sentence):
   #return chinese_sentence.split()
-  words = re.findall(r'\S+', chinese_sentence)
+  #words = re.findall(r'\S+', chinese_sentence)
+  words = segment_chinese_sentence(chinese_sentence)
   return [word for word in words if word in get_dictionary()]
+
+@memoized
+def get_chinese_pos_tagger():
+  return stanford.StanfordTagger(lang='zh')
+
+@memoized
+def get_english_pos_tagger():
+  return stanford.StanfordTagger(lang='en')
+
+def getTag(tagged_word):
+  return tagged_word[tagged_word.rindex('#')+1:]
+
+def getWord(tagged_word):
+  return tagged_word[:tagged_word.rindex('#')]
+
+# list of word,tag tuples
+@memoized
+def get_pos_tags_in_chinese_sentence(sentence):
+  sentence_nowhitespace = ''.join(sentence.split()).decode('utf-8')
+  if sentence_nowhitespace in get_precomputed_chinese_sentence_to_pos_tags():
+    tags_for_sentence = get_precomputed_chinese_sentence_to_pos_tags()[sentence_nowhitespace.decode('utf-8')]
+    return [(word.decode('utf-8'),tag.decode('utf-8')) for word,tag in tags_for_sentence]
+    #return [(getWord(word),tag) for word,tag in tags_for_sentence]
+  raise Exception('not found in dictionary:' + sentence)
+  words = segment_chinese_sentence(sentence)
+  tags = get_chinese_pos_tagger().tag(words)
+  return [(getWord(word[0]), getTag(word[0])) for word in tags]
+
+@memoized
+def get_precomputed_chinese_sentence_to_pos_tags():
+  return json.load(open('tagged_chinese_sentences.json'))
+
+def get_pos_tags_in_chinese_sentence_bulk(sentences):
+  segmented_sentences = [segment_chinese_sentence(sentence) for sentence in sentences]
+  tags_by_sentence = get_chinese_pos_tagger().batch_tag(segmented_sentences)
+  return [[(getWord(word[0]), getTag(word[0])) for word in tags] for tags in tags_by_sentence]
+
+# list of word,tag tuples
+@memoized
+def get_pos_tags_in_english_sentence(sentence):
+  words = re.findall(r'\w+', sentence)
+  tags = get_english_pos_tagger().tag(words)
+  return tags
 

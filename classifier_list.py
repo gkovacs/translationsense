@@ -3,6 +3,7 @@ from classifier_occurrence import *
 from classifier_fraction import *
 from classifier_clustered import *
 from classifier_xinyi import *
+from classifier_postag import *
 
 @memoized
 def getClassifier(classifierType, word):
@@ -18,6 +19,8 @@ def getClassifierByName(name):
     return OccurrenceClassifier
   elif 'cluster' in name:
     return ClusteredOccurrenceClassifier
+  elif 'pos' in name:
+    return POSTagClassifier
   elif 'xinyi' in name:
     return XinyiClassifier
   else:

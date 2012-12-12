@@ -8,7 +8,7 @@ def word_similarity(word1, word2):
 
 class ClusteredOccurrenceClassifier:
   def __init__(self, word):
-    self.feature_words = get_top_cooccurring_words(word)
+    self.feature_words = get_top_cooccurring_words(word, 5, 0.3)
     self.num_definitions_available = len(list_definitions_for_word(word))
     labels = []
     observations = []
