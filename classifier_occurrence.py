@@ -1,8 +1,8 @@
 from classify_word_utils import *
-
+from corpus_utils import *
 class OccurrenceClassifier:
-  def __init__(self, word):
-    self.feature_words = get_top_cooccurring_words(word)
+  def __init__(self, word,topn, thresh):
+    self.feature_words = get_top_cooccurring_words(word,topn,thresh)
     self.num_definitions_available = len(list_definitions_for_word(word))
     labels = []
     observations = []
@@ -14,6 +14,7 @@ class OccurrenceClassifier:
         continue
       labels.append(most_common_reference_definition)
       observations.append(features)
+    self.observations = observations
     if len(labels) == 0:
       raise Exception("need at least 1 reference definition in training data for word " + word)
     self.classifier = mlpy.LibSvm(kernel_type='poly')
@@ -22,8 +23,9 @@ class OccurrenceClassifier:
     words_in_sentence = set(get_words_in_chinese_sentence(sentence))
     features = []
     for feature_word in self.feature_words:
+      total_oc = get_training_corpus().get_word_count(feature_word)
       if feature_word in words_in_sentence:
-        features.append(1)
+        features.append(1.0/total_oc)
       else:
         features.append(0)
     return features

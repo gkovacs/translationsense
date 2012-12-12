@@ -12,6 +12,8 @@ import re
 
 import parse_corpora
 
+import heapq
+
 from argmax_impl import *
 
 class ParallelCorpus:
@@ -79,6 +81,14 @@ class ParallelCorpus:
         word_counts[word] += 1
     return word_counts
   
+
+  @memoized
+  def get_top_words(self,n):
+    d = self.word_counts_in_corpus()
+    d = [(value,word) for word,value in d.iteritems()]
+    return heapq.nlargest(n, d)
+
+
   def get_word_count(self, word):
     if word in self.word_counts_in_corpus():
       return self.word_counts_in_corpus()[word]
@@ -97,7 +107,7 @@ class ParallelCorpus:
   def get_english_word_count(self, word):
     if word in self.english_word_counts_in_corpus():
       return self.english_word_counts_in_corpus()[word]
-    return word
+    return 0
 
   @memoized
   def get_reference_definition_idx_counts(self, word):
@@ -137,7 +147,13 @@ class ParallelCorpus:
     english_sent = self.get_english_sentence_for_chinese(chinese_sent)
     english_words_in_sent = set(get_salient_english_words(english_sent))
     definition_scores = []
-    for idx,definition in enumerate(list_definitions_for_word(word)):
+    if word not in get_dictionary():
+      return -1
+    try:
+      definitions = list_definitions_for_word(word)
+    except:
+      return -1
+    for idx,definition in enumerate(definitions):
       english_words_in_definition = get_salient_english_words(definition)
       definition_score = sum([inverse_freq_score(word) for word in english_words_in_definition if word in english_words_in_sent])
       #definition_score = sum([1.0 for word in english_words_in_definition if word in english_words_in_sent])
@@ -156,11 +172,11 @@ def inverse_freq_score(w):
 
 @memoized
 def get_training_data():
-  return parse_corpora.get_alignments(49, 0) # 0 through 49
+  return parse_corpora.get_alignments(100, 0) # 0 through 49
 
 @memoized
 def get_test_data():
-  return parse_corpora.get_alignments(10, 50) # 50 through 60
+  return parse_corpora.get_alignments(10, 99) # 50 through 60
 
 @memoized
 def get_training_corpus():
