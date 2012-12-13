@@ -172,11 +172,13 @@ def inverse_freq_score(w):
 
 @memoized
 def get_training_data():
-  return parse_corpora.get_alignments(100, 0) # 0 through 49
+  #return parse_corpora.get_alignments(320, 0) # 0 through 49
+  return parse_corpora.get_alignments(100, 0)
 
 @memoized
 def get_test_data():
-  return parse_corpora.get_alignments(10, 101) # 50 through 60
+  #return parse_corpora.get_alignments(24, 321) # 50 through 60
+  return parse_corpora.get_alignments(10, 101) # 0 through 49
 
 @memoized
 def get_training_corpus():

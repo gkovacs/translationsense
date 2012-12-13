@@ -104,7 +104,7 @@ def get_pos_tags_in_chinese_sentence(sentence):
 
 @memoized
 def get_precomputed_chinese_sentence_to_pos_tags():
-  return json.load(open('tagged_chinese_sentences.json'))
+  return json.load(open('tagged_chinese_sentences_full.json'))
 
 def get_pos_tags_in_chinese_sentence_bulk(sentences):
   segmented_sentences = [segment_chinese_sentence(sentence) for sentence in sentences]
