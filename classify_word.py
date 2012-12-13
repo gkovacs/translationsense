@@ -50,18 +50,18 @@ def word_has_enough_nonmajority_definitions(word, threshold=0.3):
   return False
 
 def main(args):
-  feature_vector_pare_down_size = 100
-  freq_threshold = 0.3
-  number_of_stop_words = 50
-  non_maj_thresh = 0.3
-  ref_data_req = 50
+  # feature_vector_pare_down_size = 100
+  # freq_threshold = 0.3
+  # number_of_stop_words = 50
+  # non_maj_thresh = 0.3
+  # ref_data_req = 50
 
   #baseline
-  feature_vector_pare_down_size = 10000
-  freq_threshold = 0.0
-  number_of_stop_words = 0
-  non_maj_thresh = 0.0
-  ref_data_req = 1 
+  # feature_vector_pare_down_size = 10000
+  # freq_threshold = 0.0
+  # number_of_stop_words = 0
+  # non_maj_thresh = 0.0
+  # ref_data_req = 1 
 
 
   # fv_values = [30, 50, 100, 500, 1000] 
@@ -77,35 +77,57 @@ def main(args):
   #nm = < 0.3
   #rd = 500
 
-  fv_values = [30, 50, 100, 500, 1000] 
-  f_values = [1.0]
+  #baseline new params
+  feature_vector_scale_size = 1
+  freq_threshold = 0.0
+  number_of_stop_words = 0
+  non_maj_thresh = 0.0
+  ref_data_req = 1 
+  fv_values = [2,3,4,5,6] 
+  f_values = [0.0]
   sw_values = [10, 50, 100, 200]
-  nm_values = [0.4]
-  rd_values = [10, 50, 100]
+  nm_values = [0.2,0.4,0.45,0.5]
+  rd_values = [10,20,40,60,100]
 
   #f_value of 1.0 beats the max_classifier
 
   #c = OccurrenceClassifier
+  m_thresh = [3,4,5] 
+  words = ['研究所']
   classifiers = [MaxCountClassifier, OccurrenceClassifier]
+<<<<<<< HEAD
+  # for m in m_thesh:
+  #   for c in classifiers:
+  #     print "CLASSIFIER:", c
+  #     run_test_single_word('研究所',c,m,0.0,100,0.0,1)
+
+  ratio = [0.33,0.36,0.4,0.43]
+=======
   for c in classifiers:
      print "CLASSIFIER:", c
      run_test_single_word('研究所',c,1,0.0,100,0.0,1)
   '''
   ratio = [1,2,3]
+>>>>>>> 2edad54d8da447c9a6137a8a9ec4d6c72ebae88f
   for r in ratio:
-    print "MAJ THRESH" , r
+  #   print "MAJ THRESH" , r
     for c in classifiers:
+<<<<<<< HEAD
+    #     print "CLASSIFIER:", c
+      run_test(c,4.3,0,50,0.4,10)
+=======
       print "CLASSIFIER:", c
       run_test(c,r,0,50,0.35,10)
   '''
+>>>>>>> 2edad54d8da447c9a6137a8a9ec4d6c72ebae88f
   # print "-----------------------------------------------------"
-  #   run_test(c,feature_vector_pare_down_size,
+  #   run_test(c,feature_vector_scale_size,
   #     freq_threshold,
   #     number_of_stop_words,
   #     non_maj_thresh,
   #     ref_data_req)
 
-  #   print " ********************** FV size"
+  #   print " ********************** FV to obs ratio"
   #   for fv in fv_values:
   #     run_test(c,fv,
   #       freq_threshold,
@@ -113,33 +135,25 @@ def main(args):
   #       non_maj_thresh,
   #       ref_data_req)
     
-  # print " ********************** Freq thresh"
-  # for f in f_values:
-  #   run_test(c,feature_vector_pare_down_size,
-  #     f,
-  #     number_of_stop_words,
-  #     non_maj_thresh,
-  #     ref_data_req)
-    
   #   print " ********************** Stop Words"
   #   for sw in sw_values:
-  #     run_test(c,feature_vector_pare_down_size,
+  #     run_test(c,feature_vector_scale_size,
   #       freq_threshold,
   #       sw,
   #       non_maj_thresh,
   #       ref_data_req)
     
-    # print " ********************** Non Maj"
-    # for nm in nm_values:
-    #   run_test(c,feature_vector_pare_down_size,
-    #     freq_threshold,
-    #     number_of_stop_words,
-    #     nm,
-    #     ref_data_req)
+  #   print " ********************** Non Maj"
+  #   for nm in nm_values:
+  #     run_test(c,feature_vector_scale_size,
+  #       freq_threshold,
+  #       number_of_stop_words,
+  #       nm,
+  #       ref_data_req)
 
   #   print " ********************** Ref Data"
   #   for rd in rd_values:
-  #     run_test(c,feature_vector_pare_down_size,
+  #     run_test(c,feature_vector_scale_size,
   #       freq_threshold,
   #       number_of_stop_words,
   #       non_maj_thresh,
@@ -214,6 +228,7 @@ def run_test_single_word(word, classifier, fv_size_scale,thresh,num_stop,non_maj
   # missing_features_in_default = list(set(default_features) - set(combination_features))
   # print 'missing features in default', missing_features_in_default
   # print 'number of missing in default', len(missing_features_in_default)
+  print 'Num observations', classifier.get_num_observations()
   print 'Number of skipped words:', skipped_words
   print 'Total number of word instances:', num_word_instances
   print 'Number of word instances correctly classified:', num_word_instances_correctly_classified

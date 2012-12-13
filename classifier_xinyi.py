@@ -5,7 +5,7 @@ class OccurrenceClassifier:
     self.word = word
     self.observations = self.get_num_observations()
     #print "NUM OBS:", self.observations
-    self.feature_words = self.get_feature_words((int)(round(self.observations*fv_size_scale)),thresh)
+    self.feature_words = self.get_feature_words((int)(round(self.observations*topn)),thresh)
     self.num_definitions_available = len(list_definitions_for_word(word))
     labels = []
     observations = []
