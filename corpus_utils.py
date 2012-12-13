@@ -178,7 +178,7 @@ def get_training_data():
 @memoized
 def get_test_data():
   #return parse_corpora.get_alignments(24, 321) # 50 through 60
-  return parse_corpora.get_alignments(10, 101) # 0 through 49
+  return parse_corpora.get_alignments(10, 99) # 0 through 49
 
 @memoized
 def get_training_corpus():

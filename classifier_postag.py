@@ -1,6 +1,6 @@
 from classify_word_utils import *
 
-from postage_classify_utils import *
+from postag_classify_utils import *
 
 class POSTagClassifier:
   def __init__(self, word, fv_size_scale, thresh):

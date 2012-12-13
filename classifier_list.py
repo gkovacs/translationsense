@@ -3,6 +3,7 @@ from classifier_occurrence import *
 from classifier_fraction import *
 from classifier_clustered import *
 from classifier_xinyi import *
+from classifier_xinyi_clustered import *
 from classifier_postag import *
 from classifier_postag_occurrence import *
 from classifier_nearby_postag_occurrence import *
@@ -21,6 +22,8 @@ def getClassifierByName(name):
     return POSTagOccurrenceClassifier
   elif 'occurrence' in name:
     return OccurrenceClassifier
+  elif 'xcluster' in name:
+    return XinyiClusteredClassifier
   elif 'cluster' in name:
     return ClusteredOccurrenceClassifier
   elif 'nearbypos' in name:
