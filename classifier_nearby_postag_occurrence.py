@@ -7,7 +7,8 @@ for idx,tag in enumerate(alltags):
 
 def pos_to_feature_vector(postag):
   features = [0]*len(alltags)
-  features[tag_to_idx[postag]] = 1
+  if postag in tag_to_idx:
+    features[tag_to_idx[postag]] = 1
   return features
 
 class NearbyPOSTagOccurrenceClassifier:

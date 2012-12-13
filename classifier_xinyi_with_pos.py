@@ -1,5 +1,8 @@
 from classify_word_utils import *
 from corpus_utils import *
+
+from postag_classify_utils import *
+
 class XinyiWithPOSClassifier:
   def __init__(self, word,fv_size_scale, thresh):
     self.word = word
@@ -83,6 +86,13 @@ class XinyiWithPOSClassifier:
       else:
         features[i] = 0
     return features
+  def get_pos_tag(self, sentence):
+    tag = None
+    for curword,curtag in get_pos_tags_in_chinese_sentence(sentence):
+      if curword == self.word:
+        tag = curtag
+        break
+    return tag
   def get_observation_vectors(self):
     return self.observations
   def get_feature_vector(self):
