@@ -51,7 +51,7 @@ def get_cooccurring_words(word):
 #   return [word for count,word in top_count_words]
 @memoized
 def get_top_cooccurring_words_for_meaning(word,sentences,topn=100, threshold=0.3):
-  print "TOP N", topn
+  #print "TOP N", topn
   topn = min(800,topn)
   cooccurring_word_counts = {}
   total_cooccurring_word_count = 0

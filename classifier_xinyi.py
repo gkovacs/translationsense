@@ -4,7 +4,7 @@ class OccurrenceClassifier:
   def __init__(self, word,topn, thresh):
     self.word = word
     self.observations = self.get_num_observations()
-    print "NUM OBS:", self.observations
+    #print "NUM OBS:", self.observations
     self.feature_words = self.get_feature_words((int)(round(self.observations*topn)),thresh)
     self.num_definitions_available = len(list_definitions_for_word(word))
     labels = []
@@ -89,7 +89,7 @@ class OccurrenceClassifier:
     return self.feature_words
   def get_definition_idx(self, sentence):
     features = self.extract_features(sentence)
-    print "features",features
+    #print "features",features
     prediction = self.classifier.pred(features)
     prediction = int(round(prediction))
     if prediction >= self.num_definitions_available:

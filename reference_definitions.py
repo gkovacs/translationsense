@@ -12,7 +12,7 @@ import re
 
 import parse_corpora
 
-import stanford
+#import stanford
 
 import json
 
