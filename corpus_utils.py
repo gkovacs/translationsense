@@ -112,7 +112,7 @@ class ParallelCorpus:
   @memoized
   def get_reference_definition_idx_counts(self, word):
     definition_idx_to_count = {}
-    for sentence_idx in sorted(list(self.sentence_idxes_word_occurs_in(word))):
+    for sentence_idx in self.sentence_idxes_word_occurs_in(word):
       sentence = self.get_sentence_at_idx(sentence_idx)
       definition_idx = self.get_reference_definition_idx(word, sentence)
       if definition_idx not in definition_idx_to_count:
@@ -172,11 +172,13 @@ def inverse_freq_score(w):
 
 @memoized
 def get_training_data():
-  return parse_corpora.get_alignments(100, 0) # 0 through 49
+  #return parse_corpora.get_alignments(320, 0) # 0 through 49
+  return parse_corpora.get_alignments(100, 0)
 
 @memoized
 def get_test_data():
-  return parse_corpora.get_alignments(10, 99) # 50 through 60
+  #return parse_corpora.get_alignments(24, 321) # 50 through 60
+  return parse_corpora.get_alignments(10, 101) # 0 through 49
 
 @memoized
 def get_training_corpus():

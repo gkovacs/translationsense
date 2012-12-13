@@ -5,10 +5,11 @@ from classifier_clustered import *
 from classifier_xinyi import *
 from classifier_postag import *
 from classifier_postag_occurrence import *
+from classifier_nearby_postag_occurrence import *
 
 @memoized
-def getClassifier(classifierType, word,topn,thresh):
-  return classifierType(word,topn,thresh)
+def getClassifier(classifierType, word,fv_size_scale=1.0,thresh=0.0):
+  return classifierType(word,fv_size_scale,thresh)
 
 def getClassifierByName(name):
   name = name.lower()
@@ -22,6 +23,8 @@ def getClassifierByName(name):
     return OccurrenceClassifier
   elif 'cluster' in name:
     return ClusteredOccurrenceClassifier
+  elif 'nearbypos' in name:
+    return NearbyPOSTagOccurrenceClassifier
   elif 'pos' in name:
     return POSTagClassifier
   elif 'xinyi' in name:
